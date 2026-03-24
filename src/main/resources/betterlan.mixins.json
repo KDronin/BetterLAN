@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.kdrnn.betterlan.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "betterlan.refmap.json",
+  "mixins": [
+    "UUIDFixMixin"
+  ],
+  "client": [],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

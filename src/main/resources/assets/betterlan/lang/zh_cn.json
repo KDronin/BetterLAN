@@ -1,0 +1,35 @@
+{
+  "gui.betterlan.title": "开放局域网",
+  "gui.betterlan.game_mode": "游戏模式",
+  "gui.betterlan.allow_commands": "允许作弊",
+  "gui.betterlan.random_port": "随机端口号",
+  "gui.betterlan.allow_pvp": "允许 PVP",
+  "gui.betterlan.custom_port_label": "自定义端口号：",
+  "gui.betterlan.custom_port_hint": "留空则随机分配",
+  "gui.betterlan.max_players_label": "最大玩家数：",
+  "gui.betterlan.max_players_hint": "默认 8",
+  "gui.betterlan.auth_mode": "验证模式",
+  "gui.betterlan.auth.online": "在线",
+  "gui.betterlan.auth.offline": "离线",
+  "gui.betterlan.auth.offline_fix": "离线 + 修复 UUID",
+  "gui.betterlan.button.start": "开放局域网",
+  
+  "chat.betterlan.publish_failed": "§c[BetterLAN] 局域网开放失败，端口可能被占用。",
+  "chat.betterlan.auth.offline_fix_warning": "§a[BetterLAN] 已开启离线 + UUID修复。",
+  "chat.betterlan.auth.offline_warning": "§e[BetterLAN] 当前为纯离线模式。",
+
+  "gui.betterlan.button.node_config": "BetterLAN",
+  "gui.betterlan.node_config.title": "中转节点配置",
+  "gui.betterlan.node_config.ip": "IP 或 域名",
+  "gui.betterlan.node_config.port": "端口",
+  "gui.betterlan.node_config.group": "组名",
+  "gui.betterlan.node_config.password": "密码",
+  "gui.betterlan.node_config.save": "保存并返回",
+  "gui.betterlan.node_config.ip_label": "中转节点 IP:",
+  "gui.betterlan.node_config.port_label": "节点端口:",
+  "gui.betterlan.node_config.group_label": "用户组:",
+  "gui.betterlan.node_config.password_label": "密码:",
+
+  "chat.betterlan.host_synced": "§a[BetterLAN] 房间已同步至组内！等待朋友加入...",
+  "gui.betterlan.server_list.prefix": "§b[BetterLAN] §r"
+}
