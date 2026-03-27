@@ -18,7 +18,7 @@ public class LanConfig {
     static {
         BUILDER.push("Network Settings");
         NODE_IP = BUILDER.comment("节点服务器 IP 或域名").define("nodeIp", "www.example.com");
-        NODE_PORT = BUILDER.comment("节点服务器端口").defineInRange("nodePort", 7654, 1, 65535);
+        NODE_PORT = BUILDER.comment("节点服务器端口").defineInRange("nodePort", 45678, 1, 65535);
         GROUP = BUILDER.comment("N2N 组名 (Community)").define("group", "OurWorld");
         PASSWORD = BUILDER.comment("连接密码").define("password", "123456");
         BUILDER.pop();
