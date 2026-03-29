@@ -118,7 +118,6 @@ public class NodeConfigScreen extends Screen {
                         return;
 
                 String myName = this.minecraft.getUser().getName();
-
                 List<TunnelManager.PresenceData> list = new ArrayList<>(TunnelManager.globalPresenceList);
 
                 list.sort((p1, p2) -> {
@@ -209,13 +208,32 @@ public class NodeConfigScreen extends Screen {
                                 boolean isMe = data.name.equals(myName);
 
                                 String youText = isMe ? (isZh ? "§e[你] §r" : "§e[You] §r") : "";
-
                                 boolean isPremium = data.authStatus.equals("MSA");
                                 String nameColor = isPremium ? "§b" : "§f";
 
                                 g.drawString(NodeConfigScreen.this.font, youText + nameColor + data.name, left + 5,
                                                 top + 4, 0xFFFFFF);
-                                g.drawString(NodeConfigScreen.this.font, "§7" + data.geo, left + 5, top + 18, 0xFFFFFF);
+
+                                // 核心渲染：动态延迟逻辑
+                                int myPing = TunnelManager.currentPingToNode;
+                                String pingText;
+
+                                if (isMe) {
+                                        String color = myPing < 100 ? "§a" : "§e";
+                                        pingText = isZh ? "§7节点延迟: " + color + myPing + "ms"
+                                                        : "§7Node Ping: " + color + myPing + "ms";
+                                } else {
+                                        int peerPing = myPing + data.ping;
+                                        String nodeColor = data.ping < 100 ? "§a" : "§e";
+                                        String peerColor = peerPing < 150 ? "§a" : (peerPing < 300 ? "§e" : "§c");
+
+                                        pingText = isZh ? "§7节点: " + nodeColor + data.ping + "ms §7| 互联延迟: " + peerColor
+                                                        + peerPing + "ms"
+                                                        : "§7Node: " + nodeColor + data.ping + "ms §7| Peer: "
+                                                                        + peerColor + peerPing + "ms";
+                                }
+
+                                g.drawString(NodeConfigScreen.this.font, pingText, left + 5, top + 18, 0xFFFFFF);
                         }
 
                         @Override
