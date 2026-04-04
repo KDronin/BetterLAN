@@ -1,76 +1,65 @@
 package com.kdrnn.betterlan.network;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelPromise;
+import io.netty.handler.codec.ByteToMessageCodec;
+
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
+import java.security.SecureRandom;
+import java.util.List;
 
-public class AesStreamCodec extends ChannelDuplexHandler {
-    private Cipher encryptCipher;
-    private Cipher decryptCipher;
+public class AesStreamCodec extends ByteToMessageCodec<ByteBuf> {
+    private final byte[] keyBytes;
+    private Cipher encoderCipher;
+    private Cipher decoderCipher;
+    private boolean isDecoderInitialized = false;
+    private boolean isEncoderInitialized = false;
+    private final SecureRandom secureRandom = new SecureRandom();
 
-    public AesStreamCodec(String password) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] keyBytes = md.digest((password + "_SECURE_KEY_SALT").getBytes(StandardCharsets.UTF_8));
-            byte[] ivFull = md.digest((password + "_SECURE_IV_SALT").getBytes(StandardCharsets.UTF_8));
+    public AesStreamCodec(byte[] derivedKey) {
+        this.keyBytes = derivedKey;
+    }
 
-            byte[] ivBytes = new byte[16];
-            System.arraycopy(ivFull, 0, ivBytes, 0, 16);
-
-            SecretKeySpec keySpec = new SecretKeySpec(keyBytes, "AES");
-            IvParameterSpec ivSpec = new IvParameterSpec(ivBytes);
-
-            this.encryptCipher = Cipher.getInstance("AES/CTR/NoPadding");
-            this.encryptCipher.init(Cipher.ENCRYPT_MODE, keySpec, ivSpec);
-
-            this.decryptCipher = Cipher.getInstance("AES/CTR/NoPadding");
-            this.decryptCipher.init(Cipher.DECRYPT_MODE, keySpec, ivSpec);
-        } catch (Exception e) {
-            e.printStackTrace();
+    @Override
+    protected void encode(ChannelHandlerContext ctx, ByteBuf msg, ByteBuf out) throws Exception {
+        if (!isEncoderInitialized) {
+            byte[] iv = new byte[16];
+            secureRandom.nextBytes(iv);
+            encoderCipher = Cipher.getInstance("AES/CTR/NoPadding");
+            encoderCipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(keyBytes, "AES"), new IvParameterSpec(iv));
+            out.writeBytes(iv);
+            isEncoderInitialized = true;
+        }
+        int readableBytes = msg.readableBytes();
+        byte[] input = new byte[readableBytes];
+        msg.readBytes(input);
+        byte[] output = encoderCipher.update(input);
+        if (output != null) {
+            out.writeBytes(output);
         }
     }
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        if (msg instanceof ByteBuf in) {
-            byte[] inputBytes = new byte[in.readableBytes()];
-            in.readBytes(inputBytes);
-
-            byte[] outputBytes = this.decryptCipher.update(inputBytes);
-
-            if (outputBytes != null && outputBytes.length > 0) {
-                ByteBuf out = ctx.alloc().buffer(outputBytes.length);
-                out.writeBytes(outputBytes);
-                super.channelRead(ctx, out);
-            }
-            in.release();
-        } else {
-            super.channelRead(ctx, msg);
+    protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
+        if (!isDecoderInitialized) {
+            if (in.readableBytes() < 16)
+                return;
+            byte[] iv = new byte[16];
+            in.readBytes(iv);
+            decoderCipher = Cipher.getInstance("AES/CTR/NoPadding");
+            decoderCipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(keyBytes, "AES"), new IvParameterSpec(iv));
+            isDecoderInitialized = true;
         }
-    }
-
-    @Override
-    public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
-        if (msg instanceof ByteBuf in) {
-            byte[] inputBytes = new byte[in.readableBytes()];
-            in.readBytes(inputBytes);
-
-            byte[] outputBytes = this.encryptCipher.update(inputBytes);
-
-            if (outputBytes != null && outputBytes.length > 0) {
-                ByteBuf out = ctx.alloc().buffer(outputBytes.length);
-                out.writeBytes(outputBytes);
-                super.write(ctx, out, promise);
+        int readableBytes = in.readableBytes();
+        if (readableBytes > 0) {
+            byte[] input = new byte[readableBytes];
+            in.readBytes(input);
+            byte[] output = decoderCipher.update(input);
+            if (output != null) {
+                out.add(ctx.alloc().buffer(output.length).writeBytes(output));
             }
-            in.release();
-        } else {
-            super.write(ctx, msg, promise);
         }
     }
 }

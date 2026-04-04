@@ -61,6 +61,9 @@ public class ClientEvents {
     public static void onClientTick(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.END)
             return;
+
+        TunnelManager.init();
+
         Minecraft mc = Minecraft.getInstance();
         IntegratedServer server = mc.getSingleplayerServer();
 
@@ -78,6 +81,44 @@ public class ClientEvents {
                 isLanPublished = false;
                 TunnelManager.stopHost();
             }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onScreenRender(ScreenEvent.Render.Post event) {
+        Screen screen = event.getScreen();
+        if (screen != null && screen.getClass().getSimpleName().contains("Connect")) {
+            if (TunnelManager.pendingFingerprint != null
+                    && (System.currentTimeMillis() - TunnelManager.fingerprintTime < 30000)) {
+                net.minecraft.client.gui.GuiGraphics g = event.getGuiGraphics();
+                int width = screen.width;
+                int height = screen.height;
+
+                screen.renderBackground(g);
+
+                Minecraft mc = Minecraft.getInstance();
+                boolean isZh = mc.options.languageCode.toLowerCase().contains("zh");
+                String title = isZh ? "正在等待房主同意..." : "Waiting for host to accept...";
+                String fpText = isZh ? "当前安全连接指纹: §b" + TunnelManager.pendingFingerprint
+                        : "Current Session Fingerprint: §b" + TunnelManager.pendingFingerprint;
+                String hint = isZh ? "§7(请核对指纹，若不一致请点击下方的取消按钮)"
+                        : "§7(Verify fingerprint, click Cancel below if mismatch)";
+
+                int cx = width / 2;
+                int cy = height / 2 - 30;
+
+                g.drawCenteredString(mc.font, title, cx, cy, 0xFFFFFF);
+                g.drawCenteredString(mc.font, fpText, cx, cy + 20, 0xFFFFFF);
+                g.drawCenteredString(mc.font, hint, cx, cy + 40, 0xAAAAAA);
+
+                for (var child : screen.children()) {
+                    if (child instanceof net.minecraft.client.gui.components.AbstractWidget widget) {
+                        widget.render(g, event.getMouseX(), event.getMouseY(), event.getPartialTick());
+                    }
+                }
+            }
+        } else {
+            TunnelManager.pendingFingerprint = null;
         }
     }
 }

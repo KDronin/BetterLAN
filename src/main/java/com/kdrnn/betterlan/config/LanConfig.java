@@ -17,15 +17,15 @@ public class LanConfig {
 
     static {
         BUILDER.push("Network Settings");
-        NODE_IP = BUILDER.comment("节点服务器 IP 或域名").define("nodeIp", "www.example.com");
-        NODE_PORT = BUILDER.comment("节点服务器端口").defineInRange("nodePort", 45678, 1, 65535);
-        GROUP = BUILDER.comment("N2N 组名 (Community)").define("group", "OurWorld");
-        PASSWORD = BUILDER.comment("连接密码").define("password", "123456");
+        NODE_IP = BUILDER.comment("Node server IP or domain").define("nodeIp", "www.example.com");
+        NODE_PORT = BUILDER.comment("Node server port").defineInRange("nodePort", 45678, 1, 65535);
+        GROUP = BUILDER.comment("N2N group name (Community)").define("group", "OurWorld");
+        PASSWORD = BUILDER.comment("Connection password").define("password", "123456");
         BUILDER.pop();
 
         BUILDER.push("GUI Settings");
-        BUTTON_X = BUILDER.comment("主菜单按钮的 X 坐标").defineInRange("buttonX", 10, 0, 9999);
-        BUTTON_Y = BUILDER.comment("主菜单按钮的 Y 坐标").defineInRange("buttonY", 10, 0, 9999);
+        BUTTON_X = BUILDER.comment("Main menu button X coordinate").defineInRange("buttonX", 10, 0, 9999);
+        BUTTON_Y = BUILDER.comment("Main menu button Y coordinate").defineInRange("buttonY", 10, 0, 9999);
         BUILDER.pop();
 
         SPEC = BUILDER.build();
